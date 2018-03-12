@@ -1,0 +1,28 @@
+.counter {
+    position: relative;
+    background-color: black;
+    border-radius: 3px;
+    padding: 7px 8px 2px 7px;
+}
+
+.counter span {
+    font-family: 'digital-clock', sans-serif;
+    font-size: 50px;
+    color: red;
+}
+
+.counter span.background {
+    position: absolute;
+    z-index: 1;
+    opacity: 0.3;
+}
+
+.counter span.foreground {
+    z-index: 100;
+}
+
+.counter span > span {
+    width: 24px;
+    display: inline-block;
+    text-align: right;
+}

@@ -1,0 +1,108 @@
+@font-face {
+    font-family: 'digital-clock';
+    src: url('assets/fonts/digital-7/digital-7.ttf');
+}
+
+body {
+    background-color: #888;
+    font-family: "Arial", Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+header h1 {
+    font-family: 'digital-clock', sans-serif;
+    font-size: 60px;
+    color: lime;
+}
+
+#container {
+    display: flex;
+}
+
+table {
+    border-spacing: 0px;
+}
+
+button.reset-btn {
+    outline: none;
+    padding: 10px;
+    background: black;
+    color: lime;
+    border: 3px outset gray;
+    border-radius: 3px;
+    font-size: 20px;
+}
+
+button.reset-btn:active {
+    border-style: inset;
+}
+
+td {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    border: 3px outset #e2e2e2;
+    background-color: #cecece;
+    margin: 0;
+    padding: 0;
+}
+
+td:focus, td:active {
+    outline: none;
+    border: 3px inset #ccc;
+}
+
+td.mine svg {
+    display: none;
+}
+
+td.revealed {
+    border: 1px solid #808080;
+    padding: 2px;
+}
+
+td.revealed.mine {
+    background-color: red;
+}
+
+td svg {
+    vertical-align: middle;
+    text-align: center;
+}
+
+td.revealed.mine svg.fa-bomb,
+td.flagged svg.fa-flag {
+    display: inline;
+}
+
+td.flagged {
+    background-color: lime;
+}
+
+td.revealed {
+    background-color: darkgray;
+}
+
+td span {
+    font-weight: 800;
+    font-size: 14px;
+    display: none;
+}
+
+td.revealed span {
+    display: block;
+}
+
+.menu-bar {
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: column;
+    margin-right: 50px;
+}
+
+.menu-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}

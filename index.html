@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+    <link rel="stylesheet" type="text/css" href="src/app.css" />
+    <link rel="stylesheet" type="text/css" href="src/counter.css" />
+</head>
+<body>
+<header>
+    <h1>ts-minesweeper</h1>
+</header>
+<div id="container">
+    <div class="menu-bar">
+        <div class="menu-bar-item">
+            <span>Flags Remaining:</span>
+            <div class="counter flag-counter">
+            </div>
+        </div>
+        <div class="menu-bar-item">
+            <button class="reset-btn" onclick="reset()">Reset</button>
+        </div>
+        <div class="menu-bar-item">
+            <span>Time Elapsed:</span>
+            <div class="counter timer"></div>
+        </div>
+    </div>
+</div>
+<script src="compiled/counter.js"></script>
+<script src="compiled/app.js"></script>
+</body>
+</html>
