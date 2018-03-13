@@ -4,13 +4,16 @@
   "description": "Minesweeper in Typescript.",
   "main": "app.ts",
   "scripts": {
-    "watch": "tsc -w && http-server"
+    "watch": "concurrently \"watch 'tsc && npm run copy' src\" \"http-server ./compiled -a 127.0.0.1\"",
+    "copy": "copyfiles -u 1 ./src/*.html ./src/*.css ./src/assets/**/*.ttf compiled"
   },
   "author": "Zach Gottlieb",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^3.5.1",
+    "copyfiles": "^2.0.0",
     "http-server": "^0.11.1",
-    "live-server": "^1.2.0",
-    "typescript": "^2.7.2"
+    "typescript": "^2.7.2",
+    "watch": "^1.0.2"
   }
 }
