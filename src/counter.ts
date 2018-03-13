@@ -1,3 +1,5 @@
+'use strict';
+
 class Counter {
     count: number;
     element: Element;

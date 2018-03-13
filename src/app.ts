@@ -1,46 +1,80 @@
 'use strict';
 
-class Utils {
-    constructor() {}
+/*
+    TODO: Implement different settings levels
+    Minesweeper levels
+    Level           Rows    Cols    Mines
+    Beginner        9       9       10
+    Intermediate    16      16      40
+    Expert          16      30      99
+ */
 
-    static getRandomInt(min: number, max: number) {
-        let high = Math.ceil(min);
-        let low = Math.floor(max);
-        return Math.floor(Math.random() * (high - low)) + low;
+interface Settings {
+    rows: number,
+    cols: number,
+    mines: number
+}
+
+class Game {
+    board: Board;
+    timer: Counter;
+    flagCounter: Counter;
+    started: boolean = false;
+    gameOver: boolean = false;
+    timerId: number;
+    revealedCount: number = 0;
+
+    settings: Settings = {
+        rows: 16,
+        cols: 16,
+        mines: 40
+    };
+
+    constructor() {
+        this.board = new Board(this.settings.rows, this.settings.cols,this.settings.mines, this);
+        this.timer = new Counter(document.querySelector('.counter.timer'), 3);
+        this.flagCounter = new Counter(document.querySelector('.counter.flag-counter'), 2, this.settings.mines);
     }
 
-    // Returns an array randomized
-    static shuffle<T>(array: T[]): T[] {
-        let curr: T,
-            temp: T,
-            j: number,
-            dupe: T[] = [...array];
+    reset() {
+        this.started = false;
+        this.gameOver = false;
+        this.stopTimer();
+        this.timer.reset();
+        this.flagCounter.reset(this.settings.mines);
+        this.board = new Board(this.settings.rows, this.settings.cols,this.settings.mines, this);
+    }
 
-        for (let i = 0; i < dupe.length; i++) {
-            j = Utils.getRandomInt(0, dupe.length);
+    start(initSpace: Space) {
+        this.startTimer();
+        this.board.setMines(initSpace);
+        this.started = true;
+    }
 
-            curr = dupe[i];
-            temp = dupe[j];
+    end() {
+        this.stopTimer();
+        this.gameOver = true;
+    }
 
-            dupe[i] = temp;
-            dupe[j] = curr;
-        }
+    startTimer() {
+        this.timerId = setInterval(() => {
+            this.timer.increment();
+        }, 1000);
+    }
 
-        return dupe;
+    stopTimer() {
+        clearInterval(this.timerId);
     }
 }
 
-class Board {
 
-    mines: Set<Space> = new Set<Space>();
-    spaces: Space[][] = [];
+class Board {
     element: Element;
+    game: Game;
+    spaces: Space[][] = [];
     rows: number;
     cols: number;
     numMines: number;
-    revealedCount: number = 0;
-    timerId: number;
-    game: Game;
 
     constructor(rows: number, cols: number, numMines: number, game: Game) {
         this.rows = rows;
@@ -49,19 +83,12 @@ class Board {
         this.game = game;
         this.element = document.createElement('table');
 
-        this.element.addEventListener('mousedown', (event) => {
-            if (!this.game.gameOver && this.game.flagCounter.count === 0 && ((this.revealedCount + this.numMines) === (this.rows * this.cols))) {
-                this.game.end();
-                alert('YOU WIN!');
-            }
-        });
-
         for (let i = 0; i < rows; i++) {
             let rowElem = document.createElement('tr');
             let rowData = [];
 
             for (let j = 0; j < cols; j++) {
-                let space = new Space(i, j, this);
+                let space = new Space(i, j, this.game);
                 rowElem.appendChild(space.element);
                 rowData.push(space);
             }
@@ -79,26 +106,17 @@ class Board {
     }
 
     setMines(init: Space) {
-        let shuffledSpaces = Utils.shuffle([].concat(...this.spaces));
+        let minesCreated: number = 0;
+        let shuffledSpaces: Space[] = Utils.shuffle([].concat(...this.spaces));
 
-        while (this.mines.size < this.numMines && shuffledSpaces.length >= 0) {
+        while (minesCreated < this.numMines && shuffledSpaces.length >= 0) {
             let s = shuffledSpaces.shift();
 
             if (s && !Object.is(s, init)) {
                 s.setAsMine();
-                this.mines.add(s);
+                minesCreated++
             }
         }
-    }
-
-    startTimer() {
-        this.timerId = setInterval(() => {
-            this.game.timer.increment();
-        }, 1000);
-    }
-
-    stopTimer() {
-        clearInterval(this.timerId);
     }
 }
 
@@ -109,25 +127,30 @@ class Space {
     isMine: boolean = false;
     isRevealed: boolean = false;
     isFlagged: boolean = false;
-    board: Board;
+    game: Game;
 
-    constructor(row: number, col: number, board: Board) {
+    constructor(row: number, col: number, game: Game) {
         this.row = row;
         this.col = col;
-        this.board = board;
+        this.game = game;
         this.element = document.createElement('td');
 
         this.element.addEventListener('contextmenu', (event) => event.preventDefault());
 
         this.element.addEventListener('mousedown', (event: MouseEvent) => {
             // If mines have not been set (i.e. on initial click)
-            if (this.board.mines.size === 0) {
-                this.board.setMines(this);
-                this.board.startTimer();
+            if (!this.game.started) {
+                this.game.start(this);
+            }
+
+            if (!this.game.gameOver && this.game.flagCounter.count === 0 &&
+                (this.game.revealedCount + this.game.settings.mines) === (this.game.settings.rows * this.game.settings.cols)) {
+                this.game.end();
+                alert('YOU WIN!');
             }
 
             // Ignore click if space has already been revealed
-            if (this.isRevealed || this.board.game.gameOver) {
+            if (this.isRevealed || this.game.gameOver) {
                 return;
             }
 
@@ -151,7 +174,7 @@ class Space {
             this.setAsRevealed();
 
             if (this.isMine) {
-                this.board.game.end();
+                this.game.end();
                 alert('KABOOM! You lose.');
             } else {
                 this.checkNeighbors();
@@ -170,7 +193,7 @@ class Space {
     setAsRevealed() {
         this.isRevealed = true;
         this.element.classList.add('revealed');
-        this.board.revealedCount++;
+        this.game.revealedCount++;
     }
 
     toggleFlagged() {
@@ -179,14 +202,14 @@ class Space {
             this.element.classList.remove('flagged');
             let elem = this.element.querySelector('.fa-flag');
             elem.remove();
-            this.board.game.flagCounter.increment();
+            this.game.flagCounter.increment();
         } else {
             this.isFlagged = true;
             this.element.classList.add('flagged');
             let icon = document.createElement('i');
             icon.classList.add('fas', 'fa-flag');
             this.element.appendChild(icon);
-            this.board.game.flagCounter.decrement();
+            this.game.flagCounter.decrement();
         }
     }
 
@@ -210,8 +233,8 @@ class Space {
             let col: number = coors[1];
 
             // If coordinates are in bounds of the board
-            if (row >= 0 && row < this.board.spaces.length && col >= 0 && col < this.board.spaces[0].length) {
-                let space = this.board.spaces[row][col];
+            if (row >= 0 && row < this.game.board.spaces.length && col >= 0 && col < this.game.board.spaces[0].length) {
+                let space = this.game.board.spaces[row][col];
                 neighbors.push(space);
                 if (space.isMine) {
                     neighborMineCount++;
@@ -233,57 +256,3 @@ class Space {
         }
     }
 }
-
-/*
-    TODO: Implement different settings levels
-    Minesweeper levels
-    Level           Rows    Cols    Mines
-    Beginner        9       9       10
-    Intermediate    16      16      40
-    Expert          16      30      99
- */
-
-interface Settings {
-    rows: number,
-    cols: number,
-    mines: number
-}
-
-class Game {
-
-    board: Board;
-    timer: Counter;
-    flagCounter: Counter;
-    gameOver: boolean = false;
-    settings: Settings = {
-        rows: 16,
-        cols: 16,
-        mines: 40
-    };
-
-    constructor() {
-        this.board = new Board(this.settings.rows, this.settings.cols,this.settings.mines, this);
-        this.timer = new Counter(document.querySelector('.counter.timer'), 3);
-        this.flagCounter = new Counter(document.querySelector('.counter.flag-counter'), 2, this.settings.mines);
-    }
-
-    reset() {
-        this.gameOver = false;
-        this.board.stopTimer();
-        this.timer.reset();
-        this.flagCounter.reset(this.settings.mines);
-        this.board = new Board(this.settings.rows, this.settings.cols,this.settings.mines, this);
-    }
-
-    end() {
-        this.board.stopTimer();
-        this.gameOver = true;
-    }
-}
-
-let game = new Game();
-
-function reset() {
-    game.reset();
-}
-
