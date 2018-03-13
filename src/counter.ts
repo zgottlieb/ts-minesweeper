@@ -1,9 +1,9 @@
 'use strict';
 
 class Counter {
-    count: number;
-    element: Element;
-    zeroPadding: number;
+    private count: number;
+    private element: Element;
+    private zeroPadding: number;
 
     constructor(element: Element, zeroPadding: number = 0, initCount: number = 0) {
         this.element = element;
@@ -35,6 +35,10 @@ class Counter {
 
         this.element.appendChild(background);
         this.element.appendChild(foreground);
+    }
+
+    getCount() {
+        return this.count;
     }
 
     increment() {

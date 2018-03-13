@@ -143,7 +143,7 @@ class Space {
                 this.game.start(this);
             }
 
-            if (!this.game.gameOver && this.game.flagCounter.count === 0 &&
+            if (!this.game.gameOver && this.game.flagCounter.getCount() === 0 &&
                 (this.game.revealedCount + this.game.settings.mines) === (this.game.settings.rows * this.game.settings.cols)) {
                 this.game.end();
                 alert('YOU WIN!');
