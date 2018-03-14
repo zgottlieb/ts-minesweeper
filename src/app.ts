@@ -138,7 +138,6 @@ class Space {
         this.element.addEventListener('contextmenu', (event) => event.preventDefault());
 
         this.element.addEventListener('mousedown', (event: MouseEvent) => {
-            // If mines have not been set (i.e. on initial click)
             if (!this.game.started) {
                 this.game.start(this);
             }
@@ -149,7 +148,7 @@ class Space {
                 alert('YOU WIN!');
             }
 
-            // Ignore click if space has already been revealed
+            // Ignore click if space has already been revealed or if game is over
             if (this.isRevealed || this.game.gameOver) {
                 return;
             }

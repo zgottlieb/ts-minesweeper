@@ -9,7 +9,7 @@ class Utils {
         return Math.floor(Math.random() * (high - low)) + low;
     }
 
-    // Returns an array randomized
+    // Returns a randomized copy of the provided array
     static shuffle<T>(array: T[]): T[] {
         let curr: T,
             temp: T,
